@@ -6,7 +6,7 @@ This is an implementation of the Hierarchical Actor Critic (HAC) algorithm descr
 - To train a new network run `HAC.py`
 - To test a preTrained network run `test.py`
 
-To render the environment with subgoals (2 or 3 level) replace the gym files in local installation directory `gym/envs/classic_control` with the files in gym folder of this repo.
+To render the environment with subgoals (2 or 3 level) replace the gym files in local installation directory `gym/envs/classic_control` with the files in gym folder of this repo and change the bool `render` to True
 
 
 ## Requirements
