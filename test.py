@@ -13,7 +13,7 @@ def test():
     env_name = "MountainCarContinuous-v0"
     max_episodes = 5             # max num of episodes to render
     random_seed = 0
-    render = True
+    render = False
     delay = 2000000             # loop delay b/w frames for rendering
     
     env = gym.make(env_name)
