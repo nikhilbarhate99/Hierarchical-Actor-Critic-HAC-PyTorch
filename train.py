@@ -89,8 +89,8 @@ def train():
         
         if agent.check_goal(last_state, goal_state, threshold):
             print("################ Solved! ################ ")
-            filename += '_solved'
-            agent.save(directory, filename)
+            name = filename + '_solved'
+            agent.save(directory, name)
         
         # update all levels
         agent.update(n_iter, batch_size)
