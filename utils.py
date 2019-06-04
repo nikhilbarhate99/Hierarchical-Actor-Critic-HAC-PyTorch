@@ -33,10 +33,3 @@ class ReplayBuffer:
         
         return np.array(states), np.array(actions), np.array(rewards), np.array(next_states), np.array(goals),  np.array(gamma), np.array(dones)
     
-    
-class Tracker:
-  def __init__(self, k_level):
-    self.goals = [None]*k_level
-    self.reward = 0
-    self.timestep = 0
-   
