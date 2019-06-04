@@ -1,51 +1,66 @@
 import torch
 import gym
 import numpy as np
-from DDPG import DDPG
-from utils import ReplayBuffer
-from utils import Tracker
+from HAC import HAC
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def test():
     
-    ############### Hyperparameters ################
+    #################### Hyperparameters ####################
     env_name = "MountainCarContinuous-v0"
-    max_episodes = 5             # max num of episodes to render
+    save_episode = 10            # keep saving every n episodes
+    max_episodes = 5             # max num of training episodes
     random_seed = 0
-    render = False
-    delay = 2000000             # loop delay b/w frames for rendering
+    render = True
     
     env = gym.make(env_name)
     state_dim = env.observation_space.shape[0]
     action_dim = env.action_space.shape[0]
     
-    # primitive action parameters
+    """
+     Actions (both primitive and subgoal) are implemented as follows:
+       action = ( network output (Tanh) * bounds ) + offset
+       clip_high and clip_low bound the exploration noise
+    """
+    
+    # primitive action bounds and offset
     action_bounds = env.action_space.high[0]
     action_offset = np.array([0.0])
     action_offset = torch.FloatTensor(action_offset.reshape(1, -1)).to(device)
+    action_clip_low = np.array([-1.0 * action_bounds])
+    action_clip_high = np.array([action_bounds])
     
-    # state parameters
+    # state bounds and offset
     state_bounds_np = np.array([0.9, 0.07])
     state_bounds = torch.FloatTensor(state_bounds_np.reshape(1, -1)).to(device)
     state_offset =  np.array([-0.3, 0.0])
     state_offset = torch.FloatTensor(state_offset.reshape(1, -1)).to(device)
-
+    state_clip_low = np.array([-1.2, -0.07])
+    state_clip_high = np.array([0.6, 0.07])
+    
+    # exploration noise std for primitive action and subgoals
+    exploration_action_noise = np.array([0.1])        
+    exploration_state_noise = np.array([0.02, 0.01]) 
+    
     goal_state = np.array([0.48, 0.04])        # final goal state to be achived
     threshold = np.array([0.01, 0.02])         # threshold value to check if goal state is achieved
     
     # HAC parameters:
-    k_level = 2                     # num of levels in hierarchy
-    H = 20                          # time horizon to achieve subgoal
+    k_level = 2                 # num of levels in hierarchy
+    H = 20                      # time horizon to achieve subgoal
+    lamda = 0.4                 # subgoal testing parameter
     
     # DDPG parameters:
+    gamma = 0.95                # discount factor for future rewards
+    n_iter = 100                # update policy n_iter times in one DDPG update
+    batch_size = 100            # num of transitions sampled from replay buffer
     lr = 0.001
     
     # save trained models
-    directory = "./preTrained/{}/{}level".format(env_name, k_level) 
+    directory = "./preTrained/{}/{}level/".format(env_name, k_level) 
     filename = "HAC_{}".format(env_name)
-    filename = filename + '_solved'
-    ####################################################
+    #########################################################
     
     if random_seed:
         print("Random Seed: {}".format(random_seed))
@@ -53,88 +68,26 @@ def test():
         torch.manual_seed(random_seed)
         np.random.seed(random_seed)
     
-    # adding lowest level
-    HAC = [DDPG(state_dim, action_dim, action_bounds, action_offset, lr, H)]
-    replay_buffer = [ReplayBuffer()]
+    # creating HAC agent and setting parameters
+    agent = HAC(k_level, H, state_dim, action_dim, render, threshold, 
+                action_bounds, action_offset, state_bounds, state_offset, lr)
     
-    # adding remaining levels
-    for _ in range(k_level-1):
-        HAC.append(DDPG(state_dim, state_dim, state_bounds, state_offset, lr, H))
-        replay_buffer.append(ReplayBuffer())
+    agent.set_parameters(lamda, gamma, action_clip_low, action_clip_high, 
+                       state_clip_low, state_clip_high, exploration_action_noise, exploration_state_noise)
     
-    # load policy:
-    for i in range(k_level):
-        HAC[i].load_actor(directory, filename+'_level_{}'.format(i))
-        
-    # logging variable
-    tracker = Tracker(k_level)
-    
-    
-    #   <================ HAC functions ================>
-    
-    def check_goal(state, goal, threshold):
-        for i in range(state_dim):
-            if abs(state[i]-goal[i]) > threshold[i]:
-                return False
-        return True
-    
-    def run_HAC_test(i_level, state, goal):
-        next_state = None
-        done = None
-        
-        tracker.goals[i_level] = goal
-        
-        for attempt in range(H):
-            action = HAC[i_level].select_action(state, goal)
-            
-            #   <================ high level policy ================>
-            if i_level > 0:
-                next_state, done = run_HAC_test(i_level-1, state, action)
-                
-                
-            #   <================ low level policy ================>
-            else:
-                # take primitive action
-                next_state, re, done, _ = env.step(action)
-                
-                if render:
-                    # env.render()
-                    
-                    if k_level == 2:
-                        env.render_goal(tracker.goals[0], tracker.goals[1])
-                    elif k_level == 3:
-                        env.render_goal_2(tracker.goals[0], tracker.goals[1], tracker.goals[2])
-                    
-                # logging
-                tracker.reward += re
-                tracker.timestep +=1
-                
-                # delay for slowing render
-                for _ in range(delay):
-                    continue
-            
-            state = next_state
-            
-            # check if goal is achieved
-            goal_achieved = check_goal(next_state, goal, threshold)
-            
-            if done or goal_achieved:
-                break
-            
-        return next_state, done
-        
-    
-    #   <================ evaluation ================>
-    
+    # load agent
+    agent.load(directory, filename)
+
+    # Evaluation
     for i_episode in range(1, max_episodes+1):
         
-        tracker.reward = 0
-        tracker.timestep = 0
+        agent.reward = 0
+        agent.timestep = 0
         
         state = env.reset()
-        run_HAC_test(k_level-1, state, goal_state)
+        agent.run_HAC(env, k_level-1, state, goal_state, True)
         
-        print("Episode: {}\t Reward: {}\t len: {}".format(i_episode, tracker.reward, tracker.timestep))
+        print("Episode: {}\t Reward: {}\t len: {}".format(i_episode, agent.reward, agent.timestep))
     
     env.close()
 
@@ -143,3 +96,4 @@ if __name__ == '__main__':
     test()
  
   
+
