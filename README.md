@@ -15,16 +15,13 @@ To render the environment with subgoals (2 or 3 level) replace the gym files in 
 - [PyTorch](https://pytorch.org/)
 - [OpenAI gym](https://gym.openai.com/)
 
-## Disclaimer
-
-The results are not consistent with the current hyperparameters. I will update the repo if I find stable hyperparameters.
-
 
 ## Results
 
-MountainCarContinuous-v0 (2 levels, 300 episodes)  |
-:-----------------------------------:|
-![](https://github.com/nikhilbarhate99/Hierarchical-Actor-Critic-HAC-PyTorch/blob/master/gif/MountainCarContinuous-v0.gif)  |
+### MountainCarContinuous-v0
+ (2 levels, H = 20, 200 episodes)  |  (3 levels, H = 5, 200 episodes)  |
+:-----------------------------------:|:-----------------------------------:|
+![](https://github.com/nikhilbarhate99/Hierarchical-Actor-Critic-HAC-PyTorch/blob/master/gif/MountainCarContinuous-v0.gif)  | ![](https://github.com/nikhilbarhate99/Hierarchical-Actor-Critic-HAC-PyTorch/blob/master/gif/MountainCarContinuous-v0-3level.gif)  |
 
 
 
