@@ -67,10 +67,13 @@ class HAC:
             
             #   <================ high level policy ================>
             if i_level > 0:
-                # add noise if not subgoal testing
+                # add noise or take random action if not subgoal testing
                 if not subgoal_test:
-                    action = action + np.random.normal(0, self.exploration_state_noise)
-                    action = action.clip(self.state_clip_low, self.state_clip_high)
+                    if np.random.random_sample() > 0.2:
+                      action = action + np.random.normal(0, self.exploration_state_noise)
+                      action = action.clip(self.state_clip_low, self.state_clip_high)
+                    else:
+                      action = np.random.uniform(self.state_clip_low, self.state_clip_high)
                 
                 # Determine whether to test subgoal (action)
                 if np.random.random_sample() < self.lamda:
@@ -88,10 +91,13 @@ class HAC:
                 
             #   <================ low level policy ================>
             else:
-                # add noise if not subgoal testing
+                # add noise or take random action if not subgoal testing
                 if not subgoal_test:
-                    action = action + np.random.normal(0, self.exploration_action_noise)
-                    action = action.clip(self.action_clip_low, self.action_clip_high)
+                    if np.random.random_sample() > 0.2:
+                      action = action + np.random.normal(0, self.exploration_action_noise)
+                      action = action.clip(self.action_clip_low, self.action_clip_high)
+                    else:
+                      action = np.random.uniform(self.action_clip_low, self.action_clip_high)
                 
                 # take primitive action
                 next_state, rew, done, _ = env.step(action)

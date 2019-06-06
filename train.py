@@ -48,7 +48,7 @@ def train():
     # HAC parameters:
     k_level = 2                 # num of levels in hierarchy
     H = 20                      # time horizon to achieve subgoal
-    lamda = 0.4                 # subgoal testing parameter
+    lamda = 0.3                 # subgoal testing parameter
     
     # DDPG parameters:
     gamma = 0.95                # discount factor for future rewards
