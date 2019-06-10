@@ -1,6 +1,6 @@
 # Hierarchical-Actor-Critic-HAC-PyTorch
 
-This is an implementation of the Hierarchical Actor Critic (HAC) algorithm described in the paper, [Learning Multi-Level Hierarchies with Hindsight](https://arxiv.org/abs/1712.00948), in PyTorch for OpenAI gym environments. The algorithm learns to reach a goal state by dividing the task into 1 or 2 subgoals. 
+This is an implementation of the Hierarchical Actor Critic (HAC) algorithm described in the paper, [Learning Multi-Level Hierarchies with Hindsight](https://arxiv.org/abs/1712.00948), in PyTorch for OpenAI gym environments. The algorithm learns to reach a goal state by dividing the task into short horizon intermediate goals (subgoals). 
 
 
 
@@ -9,7 +9,7 @@ This is an implementation of the Hierarchical Actor Critic (HAC) algorithm descr
 - To train a new network run `train.py`
 - To test a preTrained network run `test.py`
 
-To render the environment with subgoals (2 or 3 level) replace the gym files in local installation directory `gym/envs/classic_control` with the files in gym folder of this repo and change the bool `render` to True
+To render the environments (Mountain Car and Pendulum) with subgoals (2 or 3 level) replace the gym files in local installation directory `gym/envs/classic_control` with the files in gym folder of this repo and change the bool `render` to True
 
 
 
