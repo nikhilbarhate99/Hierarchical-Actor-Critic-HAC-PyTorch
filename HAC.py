@@ -115,6 +115,7 @@ class HAC:
                     
                 # this is for logging
                 self.reward += rew
+                self.timestep +=1
                 
             # check if goal is achieved
             goal_achieved = self.check_goal(next_state, goal, self.threshold)
