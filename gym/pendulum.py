@@ -39,17 +39,21 @@ class PendulumEnv(gym.Env):
         costs = angle_normalize(th)**2 + .1*thdot**2 + .001*(u**2)
 
         newthdot = thdot + (-3*g/(2*l) * np.sin(th + np.pi) + 3./(m*l**2)*u) * dt
-        newth = th + newthdot*dt
+        
+        newth = angle_normalize(th + newthdot*dt) #####
+        
         newthdot = np.clip(newthdot, -self.max_speed, self.max_speed) #pylint: disable=E1111
 
         self.state = np.array([newth, newthdot])
-        return self._get_obs(), -costs, False, {}
+ #       return self._get_obs(), -costs, False, {}
+        return self.state, -costs, False, {}    #####
 
     def reset(self):
         high = np.array([np.pi, 1])
         self.state = self.np_random.uniform(low=-high, high=high)
         self.last_u = None
-        return self._get_obs()
+ #       return self._get_obs()
+        return self.state   #####
 
     def _get_obs(self):
         theta, thetadot = self.state
@@ -94,7 +98,7 @@ class PendulumEnv(gym.Env):
             self.pole_transform = rendering.Transform()
             rod.add_attr(self.pole_transform)
             self.viewer.add_geom(rod)
-            
+                   
             ################ goal ################
             rod1 = rendering.make_goal_circ(1, .1)
             rod1.set_color(.8, .8, .3)
@@ -119,7 +123,7 @@ class PendulumEnv(gym.Env):
             self.imgtrans = rendering.Transform()
             self.img.add_attr(self.imgtrans)
 
-        self.viewer.add_onetime(self.img)
+   #     self.viewer.add_onetime(self.img)
         self.pole_transform.set_rotation(self.state[0] + np.pi/2)
         
         self.pole_transform1.set_rotation(goal[0] + np.pi/2)
@@ -179,7 +183,8 @@ class PendulumEnv(gym.Env):
             self.imgtrans = rendering.Transform()
             self.img.add_attr(self.imgtrans)
 
-        self.viewer.add_onetime(self.img)
+   #     self.viewer.add_onetime(self.img)
+   
         self.pole_transform.set_rotation(self.state[0] + np.pi/2)
         
         self.pole_transform1.set_rotation(goal1[0] + np.pi/2)
@@ -190,7 +195,7 @@ class PendulumEnv(gym.Env):
         
         if self.last_u:
             self.imgtrans.scale = (-self.last_u/2, np.abs(self.last_u)/2)
-
+            
         return self.viewer.render(return_rgb_array = mode=='rgb_array')
 
 
