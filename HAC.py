@@ -106,9 +106,9 @@ class HAC:
                     # env.render()
                     
                     if self.k_level == 2:
-                        env.render_goal(self.goals[0], self.goals[1])
+                        env.unwrapped.render_goal(self.goals[0], self.goals[1])
                     elif self.k_level == 3:
-                        env.render_goal_2(self.goals[0], self.goals[1], self.goals[2])
+                        env.unwrapped.render_goal_2(self.goals[0], self.goals[1], self.goals[2])
                     
                     for _ in range(1000000):
                         continue
