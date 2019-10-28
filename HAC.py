@@ -51,7 +51,7 @@ class HAC:
         return True
     
     
-    def run_HAC(self, env, i_level, state, goal, subgoal_test):
+    def run_HAC(self, env, i_level, state, goal, is_subgoal_test):
         next_state = None
         done = None
         goal_transitions = []
@@ -61,14 +61,15 @@ class HAC:
         
         # H attempts
         for _ in range(self.H):
-            next_subgoal_test = subgoal_test
+            # if this is a subgoal test, then next/lower level goal has to be a subgoal test
+            is_next_subgoal_test = is_subgoal_test
             
             action = self.HAC[i_level].select_action(state, goal)
             
             #   <================ high level policy ================>
             if i_level > 0:
                 # add noise or take random action if not subgoal testing
-                if not subgoal_test:
+                if not is_subgoal_test:
                     if np.random.random_sample() > 0.2:
                       action = action + np.random.normal(0, self.exploration_state_noise)
                       action = action.clip(self.state_clip_low, self.state_clip_high)
@@ -77,13 +78,13 @@ class HAC:
                 
                 # Determine whether to test subgoal (action)
                 if np.random.random_sample() < self.lamda:
-                    next_subgoal_test = True
+                    is_next_subgoal_test = True
                 
                 # Pass subgoal to lower level 
-                next_state, done = self.run_HAC(env, i_level-1, state, action, next_subgoal_test)
+                next_state, done = self.run_HAC(env, i_level-1, state, action, is_next_subgoal_test)
                 
                 # if subgoal was tested but not achieved, add subgoal testing transition
-                if next_subgoal_test and not self.check_goal(action, next_state, self.threshold):
+                if is_next_subgoal_test and not self.check_goal(action, next_state, self.threshold):
                     self.replay_buffer[i_level].add((state, action, -self.H, next_state, goal, 0.0, float(done)))
                 
                 # for hindsight action transition
@@ -92,7 +93,7 @@ class HAC:
             #   <================ low level policy ================>
             else:
                 # add noise or take random action if not subgoal testing
-                if not subgoal_test:
+                if not is_subgoal_test:
                     if np.random.random_sample() > 0.2:
                       action = action + np.random.normal(0, self.exploration_action_noise)
                       action = action.clip(self.action_clip_low, self.action_clip_high)
