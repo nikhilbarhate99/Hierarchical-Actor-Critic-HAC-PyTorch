@@ -39,4 +39,4 @@ To render the environments (Mountain Car and Pendulum) with subgoals (2 or 3 lev
 
 ## References
 
-- Original [Paper](https://arxiv.org/abs/1712.00948) and [Code](https://github.com/andrew-j-levy/Hierarchical-Actor-Critc-HAC-)
+- Official [Paper](https://arxiv.org/abs/1712.00948) and [Code (TensorFlow)](https://github.com/andrew-j-levy/Hierarchical-Actor-Critc-HAC-)
