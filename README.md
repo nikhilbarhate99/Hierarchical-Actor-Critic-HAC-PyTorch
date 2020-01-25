@@ -15,7 +15,7 @@ To render the environments (Mountain Car and Pendulum) with subgoals (2 or 3 lev
 
 ## Implementation Details
 
-- The code is implemented as described in the appendix section of the paper and the original repository, i.e. without target networks and with bounded Q-values.
+- The code is implemented as described in the appendix section of the paper and the Official repository, i.e. without target networks and with bounded Q-values.
 - The Actor and Critic networks have 2 hidded layers of size 64.
 
 
