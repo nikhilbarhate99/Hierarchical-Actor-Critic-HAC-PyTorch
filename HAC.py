@@ -117,7 +117,9 @@ class HAC:
                 # this is for logging
                 self.reward += rew
                 self.timestep +=1
-                
+            
+            #   <================ finish one step/transition ================>
+            
             # check if goal is achieved
             goal_achieved = self.check_goal(next_state, goal, self.threshold)
             
@@ -134,6 +136,9 @@ class HAC:
             
             if done or goal_achieved:
                 break
+        
+        
+        #   <================ finish H attempts ================>
         
         # hindsight goal transition
         # last transition reward and discount is 0
