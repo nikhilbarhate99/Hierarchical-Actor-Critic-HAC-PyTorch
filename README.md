@@ -34,7 +34,9 @@ To render the environments (Mountain Car and Pendulum) with subgoals (2 or 3 lev
 :-----------------------------------:|:-----------------------------------:|
 ![](https://github.com/nikhilbarhate99/Hierarchical-Actor-Critic-HAC-PyTorch/blob/master/gif/MountainCarContinuous-v0.gif)  | ![](https://github.com/nikhilbarhate99/Hierarchical-Actor-Critic-HAC-PyTorch/blob/master/gif/MountainCarContinuous-v0-3level.gif)  |
 
-
+ (2 levels, H = 20, 200 episodes)  |
+:---------------------------------:|
+<img src="https://github.com/nikhilbarhate99/Hierarchical-Actor-Critic-HAC-PyTorch/blob/master/gif/Pendulum-v0-2level.gif" width="450" height="450"/> |
 
 
 ## References
