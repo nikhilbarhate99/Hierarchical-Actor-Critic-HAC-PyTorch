@@ -1,27 +1,30 @@
 import numpy as np
+import gym
+from hac_envs import continuous_mountain_car, pendulum
+
 
 class ReplayBuffer:
     def __init__(self, max_size=5e5):
         self.buffer = []
         self.max_size = int(max_size)
         self.size = 0
-    
+
     def add(self, transition):
         assert len(transition) == 7, "transition must have length = 7"
-        
+
         # transiton is tuple of (state, action, reward, next_state, goal, gamma, done)
         self.buffer.append(transition)
-        self.size +=1
-    
+        self.size += 1
+
     def sample(self, batch_size):
         # delete 1/5th of the buffer when full
         if self.size > self.max_size:
-            del self.buffer[0:int(self.size/5)]
+            del self.buffer[0:int(self.size / 5)]
             self.size = len(self.buffer)
-        
+
         indexes = np.random.randint(0, len(self.buffer), size=batch_size)
         states, actions, rewards, next_states, goals, gamma, dones = [], [], [], [], [], [], []
-        
+
         for i in indexes:
             states.append(np.array(self.buffer[i][0], copy=False))
             actions.append(np.array(self.buffer[i][1], copy=False))
@@ -30,6 +33,19 @@ class ReplayBuffer:
             goals.append(np.array(self.buffer[i][4], copy=False))
             gamma.append(np.array(self.buffer[i][5], copy=False))
             dones.append(np.array(self.buffer[i][6], copy=False))
-        
-        return np.array(states), np.array(actions), np.array(rewards), np.array(next_states), np.array(goals),  np.array(gamma), np.array(dones)
-    
+
+        return np.array(states), np.array(actions), np.array(rewards), np.array(next_states), np.array(goals), np.array(
+            gamma), np.array(dones)
+
+
+def make_env(env_name: str) -> gym.Env:
+    if env_name == "MountainCarContinuous-v0":
+        env = continuous_mountain_car.Continuous_MountainCarEnv()
+        env = gym.wrappers.TimeLimit(env, max_episode_steps=200)
+    elif env_name == "Pendulum-v0":
+        env = pendulum.PendulumEnv()
+        env = gym.wrappers.TimeLimit(env, max_episode_steps=200)
+    else:
+        env = gym.make(env_name)
+
+    return env
