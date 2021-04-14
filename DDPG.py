@@ -1,8 +1,7 @@
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class Actor(nn.Module):
@@ -45,19 +44,22 @@ class Critic(nn.Module):
 
 
 class DDPG:
-    def __init__(self, state_dim, action_dim, action_bounds, offset, lr, H):
-        self.actor = Actor(state_dim, action_dim, action_bounds, offset).to(device)
+    def __init__(self, state_dim, action_dim, action_bounds, offset, lr, H, device="cpu"):
+        self.device = device
+        self.actor = Actor(state_dim, action_dim, action_bounds, offset).to(self.device)
         self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=lr)
 
-        self.critic = Critic(state_dim, action_dim, H).to(device)
+        self.critic = Critic(state_dim, action_dim, H).to(self.device)
         self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=lr)
 
         self.mseLoss = torch.nn.MSELoss()
 
-    def select_action(self, state, goal):
-        state = torch.FloatTensor(state.reshape(1, -1)).to(device)
-        goal = torch.FloatTensor(goal.reshape(1, -1)).to(device)
-        return self.actor(state, goal).detach().cpu().data.numpy().flatten()
+    def select_action(self, state: np.ndarray, goal: np.ndarray) -> np.ndarray:
+        state = torch.FloatTensor(state.reshape(1, -1)).to(self.device)
+        goal = torch.FloatTensor(goal.reshape(1, -1)).to(self.device)
+        with torch.no_grad():
+            ret = self.actor(state, goal).detach().cpu().data.numpy().flatten()
+        return ret
 
     def update(self, buffer, n_iter, batch_size):
         for i in range(n_iter):
@@ -65,13 +67,13 @@ class DDPG:
             state, action, reward, next_state, goal, gamma, done = buffer.sample(batch_size)
 
             # convert np arrays into tensors
-            state = torch.FloatTensor(state).to(device)
-            action = torch.FloatTensor(action).to(device)
-            reward = torch.FloatTensor(reward).reshape((batch_size, 1)).to(device)
-            next_state = torch.FloatTensor(next_state).to(device)
-            goal = torch.FloatTensor(goal).to(device)
-            gamma = torch.FloatTensor(gamma).reshape((batch_size, 1)).to(device)
-            done = torch.FloatTensor(done).reshape((batch_size, 1)).to(device)
+            state = torch.FloatTensor(state).to(self.device)
+            action = torch.FloatTensor(action).to(self.device)
+            reward = torch.FloatTensor(reward).reshape((batch_size, 1)).to(self.device)
+            next_state = torch.FloatTensor(next_state).to(self.device)
+            goal = torch.FloatTensor(goal).to(self.device)
+            gamma = torch.FloatTensor(gamma).reshape((batch_size, 1)).to(self.device)
+            done = torch.FloatTensor(done).reshape((batch_size, 1)).to(self.device)
 
             # select next action
             next_action = self.actor(next_state, goal).detach()
@@ -99,5 +101,5 @@ class DDPG:
         torch.save(self.critic.state_dict(), '%s/%s_crtic.pth' % (directory, name))
 
     def load(self, directory, name):
-        self.actor.load_state_dict(torch.load('%s/%s_actor.pth' % (directory, name), map_location='cpu'))
-        self.critic.load_state_dict(torch.load('%s/%s_crtic.pth' % (directory, name), map_location='cpu'))
+        self.actor.load_state_dict(torch.load('%s/%s_actor.pth' % (directory, name), map_location=self.device))
+        self.critic.load_state_dict(torch.load('%s/%s_crtic.pth' % (directory, name), map_location=self.device))

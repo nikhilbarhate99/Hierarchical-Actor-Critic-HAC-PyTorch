@@ -1,22 +1,20 @@
 import torch
 import numpy as np
-from DDPG import DDPG
-from utils import ReplayBuffer
-
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+from .DDPG import DDPG
+from .utils import ReplayBuffer
 
 
 class HAC:
     def __init__(self, k_level, H, state_dim, action_dim, render, threshold,
-                 action_bounds, action_offset, state_bounds, state_offset, lr):
+                 action_bounds, action_offset, state_bounds, state_offset, lr, device="cpu"):
 
         # adding lowest level
-        self.HAC = [DDPG(state_dim, action_dim, action_bounds, action_offset, lr, H)]
+        self.HAC = [DDPG(state_dim, action_dim, action_bounds, action_offset, lr, H, device)]
         self.replay_buffer = [ReplayBuffer()]
 
         # adding remaining levels
         for _ in range(k_level - 1):
-            self.HAC.append(DDPG(state_dim, state_dim, state_bounds, state_offset, lr, H))
+            self.HAC.append(DDPG(state_dim, state_dim, state_bounds, state_offset, lr, H, device))
             self.replay_buffer.append(ReplayBuffer())
 
         # set some parameters
@@ -45,9 +43,8 @@ class HAC:
         self.exploration_state_noise = exploration_state_noise
 
     def check_goal(self, state, goal, threshold):
-        for i in range(self.state_dim):
-            if abs(state[i] - goal[i]) > threshold[i]:
-                return False
+        if (np.abs(state - goal) > threshold).any():
+            return False
         return True
 
     def run_HAC(self, env, i_level, state, goal, is_subgoal_test):
@@ -62,7 +59,6 @@ class HAC:
         for _ in range(self.H):
             # if this is a subgoal test, then next/lower level goal has to be a subgoal test
             is_next_subgoal_test = is_subgoal_test
-
             action = self.HAC[i_level].select_action(state, goal)
 
             #   <================ high level policy ================>
@@ -103,8 +99,6 @@ class HAC:
                 next_state, rew, done, _ = env.step(action)
 
                 if self.render:
-                    # env.render()
-
                     if self.k_level == 2:
                         env.unwrapped.render_goal(self.goals[0], self.goals[1])
                     elif self.k_level == 3:
@@ -134,7 +128,6 @@ class HAC:
                 break
 
         #   <================ finish H attempts ================>
-
         # hindsight goal transition
         # last transition reward and discount is 0
         goal_transitions[-1][2] = 0.0
@@ -157,3 +150,5 @@ class HAC:
     def load(self, directory, name):
         for i in range(self.k_level):
             self.HAC[i].load(directory, name + '_level_{}'.format(i))
+
+        return self

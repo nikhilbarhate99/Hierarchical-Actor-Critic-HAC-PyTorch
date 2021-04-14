@@ -43,7 +43,7 @@ def train():
     exploration_action_noise = np.array([0.1])
     exploration_state_noise = np.array([0.02, 0.01])
 
-    goal_state = np.array([0.48, 0.04])  # final goal state to be achived
+    goal_state = np.array([0.48, 0.04])  # final goal state to be achieved
     threshold = np.array([0.01, 0.02])  # threshold value to check if goal state is achieved
 
     # HAC parameters:

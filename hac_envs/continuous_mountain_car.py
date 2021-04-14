@@ -89,7 +89,7 @@ class Continuous_MountainCarEnv(gym.Env):
     def _height(self, xs):
         return np.sin(3 * xs) * .45 + .55
 
-    def render(self, mode='human'):
+    def render(self, mode='human', render_here=True):
         screen_width = 600
         screen_height = 400
 
@@ -113,6 +113,7 @@ class Continuous_MountainCarEnv(gym.Env):
 
             l, r, t, b = -carwidth / 2, carwidth / 2, carheight, 0
             car = rendering.FilledPolygon([(l, b), (l, t), (r, t), (r, b)])
+            self.car = car
             car.add_attr(rendering.Transform(translation=(0, clearance)))
             self.cartrans = rendering.Transform()
             car.add_attr(self.cartrans)
@@ -140,7 +141,7 @@ class Continuous_MountainCarEnv(gym.Env):
         self.cartrans.set_translation((pos - self.min_position) * scale, self._height(pos) * scale)
         self.cartrans.set_rotation(math.cos(3 * pos))
 
-        return self.viewer.render(return_rgb_array=mode == 'rgb_array')
+        return self.viewer.render(return_rgb_array=mode == 'rgb_array') if render_here else None
 
     def render_goal(self, goal, end_goal, mode='human'):
         screen_width = 600

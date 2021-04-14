@@ -1,6 +1,6 @@
 import numpy as np
 import gym
-from hac_envs import continuous_mountain_car, pendulum
+from .hac_envs import continuous_mountain_car, pendulum
 
 
 class ReplayBuffer:
