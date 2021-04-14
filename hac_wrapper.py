@@ -6,6 +6,7 @@ from gym.spaces import Box, Discrete
 
 import os
 import pickle
+from os.path import dirname
 
 
 class HAC(HAC_):
@@ -67,9 +68,9 @@ class HAC(HAC_):
 
     def learn(self, n_epoch, n_iter, batch_size, save_path):
         if save_path is not None:
-            if not os.path.isdir(save_path):
-                os.makedirs(save_path)
-            log_f = open(f"{save_path}/hac_training_log.csv", "w")
+            if not os.path.isdir(os.path.dirname(save_path)):
+                os.makedirs(dirname(dirname(save_path)))
+            log_f = open(f"{dirname(dirname(save_path))}/training_log.csv", "w")
         else:
             log_f = None
 
@@ -112,6 +113,8 @@ class HAC(HAC_):
         return action
 
     def save(self, path, **kwargs):
+        if not os.path.isdir(path):
+            os.makedirs(path)
         with open(f"{path}/params.pkl", "wb") as f:
             pickle.dump(self._init_params, f)
         super(HAC, self).save(directory=path, name="model")
