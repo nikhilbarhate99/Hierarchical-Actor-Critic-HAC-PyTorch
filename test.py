@@ -1,5 +1,6 @@
 import torch
 import gym
+import asset
 import numpy as np
 from HAC import HAC
 
@@ -8,7 +9,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 def test():
     
     #################### Hyperparameters ####################
-    env_name = "MountainCarContinuous-v0"
+    env_name = "MountainCarContinuous-h-v1"#"MountainCarContinuous-v0"
     save_episode = 10            # keep saving every n episodes
     max_episodes = 5             # max num of training episodes
     random_seed = 0
