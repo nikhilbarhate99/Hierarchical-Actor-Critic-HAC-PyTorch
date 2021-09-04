@@ -8,10 +8,8 @@ This is an implementation of the Hierarchical Actor Critic (HAC) algorithm descr
 - All the hyperparameters are contained in the `train.py` file.
 - To train a new network run `train.py`
 - To test a preTrained network run `test.py`
-
-To render the environments (Mountain Car and Pendulum) with subgoals (2 or 3 level) replace the gym files in local installation directory `gym/envs/classic_control` with the files in gym folder of this repo and change the bool `render` to True
-
-
+- For a detailed explanation of offsets and bounds, refer to [issue #2](https://github.com/nikhilbarhate99/Hierarchical-Actor-Critic-HAC-PyTorch/issues/2)
+- For hyperparameters used for preTraining the pendulum policy refer to [issue #3](https://github.com/nikhilbarhate99/Hierarchical-Actor-Critic-HAC-PyTorch/issues/3)
 
 ## Implementation Details
 
